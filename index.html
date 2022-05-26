@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Firebase RealTime Chat</title>
+    <link rel="stylesheet" href="./index.css">
+  </head>
+  <body>
+
+    <!-- scripts --><header>
+      <h2>Firebase RealTime Chat</h2>
+    </header>
+
+    <div id="chat">
+      <!-- messages will display here -->
+      <ul id="messages"></ul>
+
+      <!-- form to send message -->
+      <form id="message-form">
+        <input id="message-input" type="text" />
+        <button id="message-btn" type="submit">Send</button>
+      </form>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-database.js"></script>
+    <script>
+      var firebaseConfig = {
+        apiKey: "AIzaSyClqgz6znYDFs_pwtAf5g8YLZANlRKSEYc",
+        authDomain: "mensager-55c94.firebaseapp.com",
+        projectId: "mensager-55c94",
+        storageBucket: "mensager-55c94.appspot.com",
+        messagingSenderId: "849874686678",
+        appId: "1:849874686678:web:c718bdeab2c70521426f77"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
+      const username = prompt("Por favor, diga-nos seu nome para que possa enviar mensagens");
+      
+      function sendMessage(e) {
+        e.preventDefault();
+
+        // get values to be submitted
+        const timestamp = Date.now();
+        const messageInput = document.getElementById("message-input");
+        const message = messageInput.value;
+
+        // clear the input box
+        messageInput.value = "";
+
+        //auto scroll to bottom
+        document
+          .getElementById("messages")
+          .scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
+
+        // create db collection and send in the data
+        db.ref("messages/" + timestamp).set({
+          username,
+          message,
+        });
+      }
+      document.getElementById("message-form").addEventListener("submit", sendMessage);
+      const fetchChat = db.ref("messages/");
+      fetchChat.on("child_added", function (snapshot) {
+        const messages = snapshot.val();
+        const message = `<li class=${
+          username === messages.username ? "sent" : "receive"
+        }><span>${messages.username}: </span>${messages.message}</li>`;
+        // append the message on the page
+        document.getElementById("messages").innerHTML += message;
+      });
+    </script>  
+    <script src="index.js"></script>
+  </body>
+</html>
